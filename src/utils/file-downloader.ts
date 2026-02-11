@@ -106,7 +106,7 @@ export class FileDownloader {
 
 		// Replace variables in path - sanitize each variable value
 		Object.entries(this.variables).forEach(([key, value]) => {
-			path = path.replace(`\${${key}}`, this.sanitizePathComponent(value));
+			path = path.replace(`\${${key}}`, this.sanitizeFileSystemName(value));
 		});
 
 		// Generate the filename using the pattern
@@ -118,7 +118,7 @@ export class FileDownloader {
 		};
 
 		Object.entries(fileVariables).forEach(([key, value]) => {
-			generatedFileName = generatedFileName.replace(`\${${key}}`, this.sanitizePathComponent(value));
+			generatedFileName = generatedFileName.replace(`\${${key}}`, this.sanitizeFileSystemName(value));
 		});
 
 		// Ensure the filename has the correct extension
@@ -127,7 +127,7 @@ export class FileDownloader {
 		}
 
 		// Sanitize only the final filename (not the path, which has valid separators)
-		generatedFileName = this.sanitizeFileName(generatedFileName);
+		generatedFileName = this.sanitizeFileSystemName(generatedFileName);
 
 		return `${path}/${generatedFileName}`;
 	}
@@ -184,17 +184,13 @@ export class FileDownloader {
 		}
 	}
 
-	private sanitizePathComponent(component: string): string {
-		// Sanitize individual path components (folder names, variable values)
-		// Replace illegal characters including slashes (which cannot be in folder/file names)
+	private sanitizeFileSystemName(name: string): string {
+		// Sanitize file/folder names (cannot contain: / \ : * ? " < > |)
 		// Note: Spaces are NOT illegal and should be preserved
-		return component.replace(/[<>:"/\\|?*]/g, '_');
-	}
-
-	private sanitizeFileName(filename: string): string {
-		// Sanitize filenames (same as path components - no slashes allowed)
-		// Note: Spaces are NOT illegal and should be preserved
-		return filename.replace(/[<>:"/\\|?*]/g, '_');
+		// This is used for:
+		// - Individual path components (folder names from variables)
+		// - Filenames (including those extracted from URLs)
+		return name.replace(/[<>:"/\\|?*]/g, '_');
 	}
 
 	private async saveFile(response: RequestUrlResponse, path: string): Promise<void> {

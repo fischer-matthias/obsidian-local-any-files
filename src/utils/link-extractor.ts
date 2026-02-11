@@ -160,7 +160,7 @@ export class LinkExtractor {
 			const extension = this.getExtension(url);
 			const nameWithoutExt = filename.substring(0, filename.length - extension.length);
 			const cleanName = nameWithoutExt
-				.replace(/[<>:"\/\\|?*]/g, '_') // Replace illegal characters with underscore
+				.replace(/[<>:"/\\|?*]/g, '_') // Replace illegal characters with underscore
 				.replace(/_+/g, '_') // Replace multiple underscores with single one
 				.replace(/^_|_$/g, ''); // Remove leading/trailing underscores
 			
@@ -173,7 +173,7 @@ export class LinkExtractor {
 			const nameWithoutExt = lastSegment.substring(0, lastSegment.length - extension.length);
 			
 			return nameWithoutExt
-				.replace(/[<>:"\/\\|?*]/g, '_')
+				.replace(/[<>:"/\\|?*]/g, '_')
 				.replace(/_+/g, '_')
 				.replace(/^_|_$/g, '') + extension;
 		}

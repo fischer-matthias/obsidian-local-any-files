@@ -155,12 +155,12 @@ export class LinkExtractor {
 			if (!filename) return 'untitled';
 			
 			// Generate a clean filename by:
-			// 1. Removing any problematic characters
-			// 2. Preserving the extension we detected
+			// 1. Removing only truly illegal cross-platform characters (/ \ : * ? " < > |)
+			// 2. Preserving spaces and the extension
 			const extension = this.getExtension(url);
 			const nameWithoutExt = filename.substring(0, filename.length - extension.length);
 			const cleanName = nameWithoutExt
-				.replace(/[^a-zA-Z0-9-_]/g, '_') // Replace invalid characters with underscore
+				.replace(/[<>:"\/\\|?*]/g, '_') // Replace illegal characters with underscore
 				.replace(/_+/g, '_') // Replace multiple underscores with single one
 				.replace(/^_|_$/g, ''); // Remove leading/trailing underscores
 			
@@ -173,7 +173,7 @@ export class LinkExtractor {
 			const nameWithoutExt = lastSegment.substring(0, lastSegment.length - extension.length);
 			
 			return nameWithoutExt
-				.replace(/[^a-zA-Z0-9-_]/g, '_')
+				.replace(/[<>:"\/\\|?*]/g, '_')
 				.replace(/_+/g, '_')
 				.replace(/^_|_$/g, '') + extension;
 		}

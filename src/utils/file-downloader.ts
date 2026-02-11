@@ -186,8 +186,9 @@ export class FileDownloader {
 	}
 
 	private sanitizePath(path: string): string {
-		// Replace spaces and other common illegal characters with underscores
-		return path.replace(/[\s<>:"\\|?*]/g, '_');
+		// Replace illegal characters with underscores (cross-platform: / \ : * ? " < > |)
+		// Note: Spaces are NOT illegal and should be preserved
+		return path.replace(/[<>:"\/\\|?*]/g, '_');
 	}
 
 	private async saveFile(response: RequestUrlResponse, path: string): Promise<void> {

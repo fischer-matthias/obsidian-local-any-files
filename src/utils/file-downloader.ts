@@ -104,9 +104,9 @@ export class FileDownloader {
 		// Set extension variable
 		this.variables.extension = extension.substring(1);
 
-		// Replace variables in path
+		// Replace variables in path - sanitize each variable value
 		Object.entries(this.variables).forEach(([key, value]) => {
-			path = path.replace(`\${${key}}`, this.sanitizePath(value));
+			path = path.replace(`\${${key}}`, this.sanitizeFileSystemName(value));
 		});
 
 		// Generate the filename using the pattern
@@ -118,7 +118,7 @@ export class FileDownloader {
 		};
 
 		Object.entries(fileVariables).forEach(([key, value]) => {
-			generatedFileName = generatedFileName.replace(`\${${key}}`, this.sanitizePath(value));
+			generatedFileName = generatedFileName.replace(`\${${key}}`, this.sanitizeFileSystemName(value));
 		});
 
 		// Ensure the filename has the correct extension
@@ -126,9 +126,8 @@ export class FileDownloader {
 			generatedFileName += extension;
 		}
 
-		// Sanitize the final path
-		path = this.sanitizePath(path);
-		generatedFileName = this.sanitizePath(generatedFileName);
+		// Sanitize only the final filename (not the path, which has valid separators)
+		generatedFileName = this.sanitizeFileSystemName(generatedFileName);
 
 		return `${path}/${generatedFileName}`;
 	}
@@ -185,9 +184,13 @@ export class FileDownloader {
 		}
 	}
 
-	private sanitizePath(path: string): string {
-		// Replace spaces and other common illegal characters with underscores
-		return path.replace(/[\s<>:"\\|?*]/g, '_');
+	private sanitizeFileSystemName(name: string): string {
+		// Sanitize file/folder names (cannot contain: / \ : * ? " < > |)
+		// Note: Spaces are NOT illegal and should be preserved
+		// This is used for:
+		// - Individual path components (folder names from variables)
+		// - Filenames (including those extracted from URLs)
+		return name.replace(/[<>:"/\\|?*]/g, '_');
 	}
 
 	private async saveFile(response: RequestUrlResponse, path: string): Promise<void> {

@@ -104,9 +104,9 @@ export class FileDownloader {
 		// Set extension variable
 		this.variables.extension = extension.substring(1);
 
-		// Replace variables in path
+		// Replace variables in path - sanitize each variable value
 		Object.entries(this.variables).forEach(([key, value]) => {
-			path = path.replace(`\${${key}}`, this.sanitizePath(value));
+			path = path.replace(`\${${key}}`, this.sanitizePathComponent(value));
 		});
 
 		// Generate the filename using the pattern
@@ -118,7 +118,7 @@ export class FileDownloader {
 		};
 
 		Object.entries(fileVariables).forEach(([key, value]) => {
-			generatedFileName = generatedFileName.replace(`\${${key}}`, this.sanitizePath(value));
+			generatedFileName = generatedFileName.replace(`\${${key}}`, this.sanitizePathComponent(value));
 		});
 
 		// Ensure the filename has the correct extension
@@ -126,9 +126,8 @@ export class FileDownloader {
 			generatedFileName += extension;
 		}
 
-		// Sanitize the final path
-		path = this.sanitizePath(path);
-		generatedFileName = this.sanitizePath(generatedFileName);
+		// Sanitize only the final filename (not the path, which has valid separators)
+		generatedFileName = this.sanitizeFileName(generatedFileName);
 
 		return `${path}/${generatedFileName}`;
 	}
@@ -185,10 +184,17 @@ export class FileDownloader {
 		}
 	}
 
-	private sanitizePath(path: string): string {
-		// Replace illegal characters with underscores (cross-platform: / \ : * ? " < > |)
+	private sanitizePathComponent(component: string): string {
+		// Sanitize individual path components (folder names, variable values)
+		// Replace illegal characters including slashes (which cannot be in folder/file names)
 		// Note: Spaces are NOT illegal and should be preserved
-		return path.replace(/[<>:"/\\|?*]/g, '_');
+		return component.replace(/[<>:"/\\|?*]/g, '_');
+	}
+
+	private sanitizeFileName(filename: string): string {
+		// Sanitize filenames (same as path components - no slashes allowed)
+		// Note: Spaces are NOT illegal and should be preserved
+		return filename.replace(/[<>:"/\\|?*]/g, '_');
 	}
 
 	private async saveFile(response: RequestUrlResponse, path: string): Promise<void> {

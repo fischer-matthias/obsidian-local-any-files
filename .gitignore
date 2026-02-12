@@ -9,9 +9,9 @@
 node_modules
 package-lock.json
 
-# Don't include the compiled main.js file in the repo.
-# They should be uploaded to GitHub releases instead.
-main.js
+# Note: main.js is included in this commit to provide a working release
+# Normally main.js should be uploaded to GitHub releases instead.
+# main.js
 
 # Exclude sourcemaps
 *.map
